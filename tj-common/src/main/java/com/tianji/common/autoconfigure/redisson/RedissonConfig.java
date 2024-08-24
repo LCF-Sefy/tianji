@@ -33,7 +33,7 @@ public class RedissonConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean    //当Spring容器中没有RedissClient对象 才会创建
     public RedissonClient redissonClient(RedisProperties properties){
         log.debug("尝试初始化RedissonClient");
         // 1.读取Redis配置

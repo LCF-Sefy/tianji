@@ -22,6 +22,8 @@
         <module>tj-trade</module>
         <module>tj-exam</module>
         <module>tj-data</module>
+        <module>tj-remark</module>
+        <module>tj-promotion</module>
     </modules>
     <packaging>pom</packaging>
 
