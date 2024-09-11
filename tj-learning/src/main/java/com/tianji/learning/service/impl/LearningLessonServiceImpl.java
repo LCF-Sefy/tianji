@@ -83,6 +83,8 @@ public class LearningLessonServiceImpl extends ServiceImpl<LearningLessonMapper,
             list.add(lesson);
         }
 
+//        int i = 1 / 0;
+
         //3.批量保存
         this.saveBatch(list);
     }

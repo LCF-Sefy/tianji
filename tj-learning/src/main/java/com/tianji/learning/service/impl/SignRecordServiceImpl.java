@@ -1,26 +1,28 @@
 package com.tianji.learning.service.impl;
 
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
+import com.tianji.common.autoconfigure.mq.RocketMqHelper;
 import com.tianji.common.constants.MqConstants;
 import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.learning.constants.RedisConstants;
 import com.tianji.learning.domain.vo.SignResultVO;
-import com.tianji.learning.mq.msg.SignInMessage;
+import com.tianji.learning.enums.PointsRecordType;
+import com.tianji.learning.domain.msg.PointMessage;
 import com.tianji.learning.service.ISignRecordService;
-import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
+@Component
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,8 @@ public class SignRecordServiceImpl implements ISignRecordService {
 
     private final StringRedisTemplate redisTemplate;
     private final RabbitMqHelper mqHelper;
+
+    private final RocketMqHelper rocketMqHelper;
 
     @Override
     public SignResultVO addSignRecords() {
@@ -64,10 +68,20 @@ public class SignRecordServiceImpl implements ISignRecordService {
                 break;
         }
 
-        //6.保存积分 发送消息到mq
+        /*//6.保存积分 发送消息到mq
         mqHelper.send(MqConstants.Exchange.LEARNING_EXCHANGE,
                 MqConstants.Key.SIGN_IN,
-                SignInMessage.of(userId, rewardPoints + 1));
+                SignInMessage.of(userId, rewardPoints + 1));*/
+
+        //6.使用rocketmq，发送消息到mq
+//        MessageDTO msg = new MessageDTO<>(
+//                MqConstants.Topic.LEARN_TOPIC, MqConstants.Tag.SIGN_IN_TAG, SignInMessage.of(userId, rewardPoints + 1));
+
+        PointMessage data = new PointMessage(PointsRecordType.SIGN.getValue(), userId, rewardPoints + 1);
+//        String jsonStr = JsonUtils.toJsonStr(data);
+        boolean isSuccess = rocketMqHelper.sendSync(
+                MqConstants.Topic.LEARN_TOPIC, data);
+        log.info("发送签到消息到mq，是否成功：{}", isSuccess);
 
         //7.封装vo返回
         SignResultVO vo = new SignResultVO();

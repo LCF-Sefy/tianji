@@ -1,11 +1,14 @@
 package com.tianji.remark.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.dto.msg.LikedTimesDTO;
+import com.tianji.api.dto.msg.LikedTimesMessage;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
+import com.tianji.common.autoconfigure.mq.RocketMqHelper;
 import com.tianji.common.constants.MqConstants;
-import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.CollUtils;
+import com.tianji.common.utils.JsonUtils;
 import com.tianji.common.utils.StringUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.remark.constants.RedisConstants;
@@ -17,13 +20,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,6 +45,8 @@ public class LikedRecordRedisServiceImpl extends ServiceImpl<LikedRecordMapper, 
 
     private final RabbitMqHelper rabbitMqHelper;
     private final StringRedisTemplate redisTemplate;
+
+    private final RocketMqHelper rocketMqHelper;
 
     @Override
     public void addLikeRecord(LikeRecordFormDTO dto) {
@@ -91,6 +94,7 @@ public class LikedRecordRedisServiceImpl extends ServiceImpl<LikedRecordMapper, 
 
     /**
      * 根据业务id获取当前用户对该业务的点赞状态 由于这里短时间内会执行大量的redis命令（频繁查看set是否包含某个元素）所以这里使用了Redis的管道技术
+     *
      * @param bizIds
      * @return 返回当前用户点赞的业务id
      */
@@ -136,6 +140,7 @@ public class LikedRecordRedisServiceImpl extends ServiceImpl<LikedRecordMapper, 
 
     /**
      * 将redis中 业务类型下某业务的点赞总数 发送消息到mq
+     *
      * @param bizType
      * @param maxBizSize
      */
@@ -154,18 +159,20 @@ public class LikedRecordRedisServiceImpl extends ServiceImpl<LikedRecordMapper, 
                 continue;
             }
             //3.封装LikedTimesDTO 消息数据
-            LikedTimesDTO msg = LikedTimesDTO.of(Long.valueOf(bizId), likedTimes.intValue());
+            LikedTimesDTO msg = new LikedTimesDTO(Long.valueOf(bizId), likedTimes.intValue());
             list.add(msg);
         }
-
-        //4.发送消息到mq
+        //4.发送签到消息到mq
         if (CollUtils.isNotEmpty(list)) {
-            String routingKey = StringUtils.format(MqConstants.Key.LIKED_TIMES_KEY_TEMPLATE, bizType);
-            log.debug("发送点赞消息，消息内容：{}", list);
-            rabbitMqHelper.send(
-                    MqConstants.Exchange.LIKE_RECORD_EXCHANGE,
-                    routingKey,
-                    list);
+//            String routingKey = StringUtils.format(MqConstants.Key.LIKED_TIMES_KEY_TEMPLATE, bizType);
+            LikedTimesMessage msg = new LikedTimesMessage(bizType, list);
+            log.debug("发送点赞消息，消息内容：{}", msg);
+            boolean isSuccess = rocketMqHelper.sendSync(MqConstants.Topic.LIKE_RECORD_TOPIC, msg);
+            log.info("发送点赞消息到mq，是否成功：{}", isSuccess);
+//            rabbitMqHelper.send(
+//                    MqConstants.Exchange.LIKE_RECORD_EXCHANGE,
+//                    routingKey,
+//                    list);
         }
     }
 }

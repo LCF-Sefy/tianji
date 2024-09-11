@@ -19,6 +19,7 @@ spring:
           - dataId: shared-feign.yaml # 共享feign配置
           - dataId: shared-mq.yaml # 共享mq配置
           - dataId: shared-xxljob.yaml # 共享mq配置
+          - dataId: shared-rocketmq.yaml # 共享rocketmq配置
 tj:
   swagger:
     enable: true

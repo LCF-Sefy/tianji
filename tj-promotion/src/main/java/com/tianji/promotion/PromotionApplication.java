@@ -1,6 +1,7 @@
 package com.tianji.promotion;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,6 +20,7 @@ import java.net.UnknownHostException;
 @EnableAsync   //开启异步调用
 @MapperScan("com.tianji.promotion.mapper")
 @Slf4j
+@EnableDubbo
 public class PromotionApplication {
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication app = new SpringApplicationBuilder(PromotionApplication.class).build(args);

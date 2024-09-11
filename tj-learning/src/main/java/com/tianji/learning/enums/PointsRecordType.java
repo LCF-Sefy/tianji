@@ -12,8 +12,7 @@ public enum PointsRecordType implements BaseEnum {
     SIGN(2, "每日签到", 0),
     QA(3, "课程问答", 20),
     NOTE(4, "课程笔记", 20),
-    COMMENT(5, "课程评价", 0),
-    ;
+    COMMENT(5, "课程评价", 0);
     @EnumValue
     @JsonValue
     int value;
@@ -27,7 +26,7 @@ public enum PointsRecordType implements BaseEnum {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static PointsRecordType of(Integer value){
+    public static PointsRecordType of(Integer value) {
         if (value == null) {
             return null;
         }

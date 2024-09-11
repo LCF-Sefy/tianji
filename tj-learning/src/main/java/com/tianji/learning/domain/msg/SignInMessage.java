@@ -1,13 +1,15 @@
-package com.tianji.learning.mq.msg;
+package com.tianji.learning.domain.msg;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor(staticName = "of")
+@NoArgsConstructor
 public class SignInMessage {
+
     private Long userId;
     private Integer points;
 }

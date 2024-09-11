@@ -59,6 +59,8 @@
         <tencent.sdk.vod.version>2.1.5</tencent.sdk.vod.version>
         <xxl-job-version>2.3.1</xxl-job-version>
         <seata-version>1.5.1</seata-version>
+        <rocketmq-client-version>4.9.6</rocketmq-client-version>
+        <rocketmq-starter>2.2.3</rocketmq-starter>
     </properties>
     <!-- 对依赖包进行管理 -->
     <dependencyManagement>

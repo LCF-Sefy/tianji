@@ -79,5 +79,48 @@ public interface MqConstants {
 
         /*领取优惠券的key*/
         String COUPON_RECEIVE = "coupon.receive";
+
+    }
+
+
+    //rocketmq相关
+    interface Topic {
+        /*学习有关topic*/
+        String LEARN_TOPIC = "learn";
+
+        /*QA:点赞记录有关topic*/
+        String LIKE_RECORD_TOPIC = "like_record";
+
+        /*订单有关topic*/
+        String ORDER_TOPIC = "order";
+
+        /*课程有关topic*/
+        String COURSE_TOPIC = "course";
+
+        /*促销服务有关topic*/
+        String PROMOTION_TOPIC = "promotion";
+    }
+
+    interface Tag{
+
+        /**
+         * 用户课程有关tag
+         */
+        String USER_COURSE_DELETE = "delete";
+        String USER_COURSE_SAVE = "save";
+
+        /*订单有关*/
+        String ORDER_PAY_TAG = "order.pay";
+        String ORDER_REFUND_TAG = "order.refund";
+
+    }
+
+    interface ConsumerGroup{
+        String SIGN_GROUP = "consumer_group_sign";
+        String LIKED_RECORD_GROUP = "consumer_group_liked_record";
+
+        /*用户课程有关消费组*/
+        String USER_COURSE_DELETE = "consumer_group_delete_course";
+        String USER_COURSE_SAVE = "consumer_group_save_course";
     }
 }

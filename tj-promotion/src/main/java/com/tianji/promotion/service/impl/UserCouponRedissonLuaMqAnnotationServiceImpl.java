@@ -3,6 +3,7 @@ package com.tianji.promotion.service.impl;
 import cn.hutool.core.bean.copier.CopyOptions;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
+import com.tianji.common.autoconfigure.mq.RocketMqHelper;
 import com.tianji.common.constants.MqConstants;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.BizIllegalException;
@@ -79,6 +80,8 @@ public class UserCouponRedissonLuaMqAnnotationServiceImpl extends ServiceImpl<Us
         EXCHANGE_COUPON_SCRIPT = RedisScript.of(new ClassPathResource("lua/exchange_coupon.lua"), String.class);
     }
 
+    private final RocketMqHelper rocketMqHelper;
+
     /**
      * 领取优惠券
      *
@@ -100,10 +103,11 @@ public class UserCouponRedissonLuaMqAnnotationServiceImpl extends ServiceImpl<Us
         }
 
         //2.发送消息到mq 消息的内容 userId  couponId
-        UserCouponDTO msg = new UserCouponDTO();
-        msg.setCouponId(id);
-        msg.setUserId(userId);
-        mqHelper.send(MqConstants.Exchange.PROMOTION_EXCHANGE, MqConstants.Key.COUPON_RECEIVE, msg);
+        UserCouponDTO userCoupon = new UserCouponDTO();
+        userCoupon.setCouponId(id);
+        userCoupon.setUserId(userId);
+        boolean isSuccess = rocketMqHelper.sendSync(MqConstants.Topic.PROMOTION_TOPIC, userCoupon);
+        log.info("发送领取优惠券消息到mq，是否成功：{}", isSuccess);
     }
 
     /**
@@ -129,6 +133,7 @@ public class UserCouponRedissonLuaMqAnnotationServiceImpl extends ServiceImpl<Us
      * 第三步：如果没有超出限领数量，则更新该优惠券的已发放数量 +1  （采用乐观锁解决超卖问题）
      * 第四步：如果没有超出限领数量，则生成用户券
      * 这个方法在这里没用到
+     *
      * @param userId
      * @param coupon
      * @param exchangeCodeId
@@ -514,7 +519,9 @@ public class UserCouponRedissonLuaMqAnnotationServiceImpl extends ServiceImpl<Us
         uc.setUserId(userId);
         uc.setCouponId(r);
         uc.setExchangeCodeId((int) exchangeCodeId);
-        mqHelper.send(MqConstants.Exchange.PROMOTION_EXCHANGE, MqConstants.Key.COUPON_RECEIVE, uc);
+        boolean isSuccess = rocketMqHelper.sendSync(MqConstants.Topic.PROMOTION_TOPIC, uc);
+        log.info("发送兑换优惠券消息到mq，是否成功：{}", isSuccess);
+        //        mqHelper.send(MqConstants.Exchange.PROMOTION_EXCHANGE, MqConstants.Key.COUPON_RECEIVE, uc);
     }
 
 

@@ -77,7 +77,7 @@ spring:
         - id: prs
           uri: lb://promotion-service
           predicates:
-            - Path=/prs/**
+            - Path=/prs/**             
       default-filters:
         - StripPrefix=1
       globalcors: # 全局的跨域处理

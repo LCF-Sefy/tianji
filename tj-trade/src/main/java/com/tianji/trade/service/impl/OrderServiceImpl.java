@@ -11,6 +11,7 @@ import com.tianji.api.dto.promotion.CouponDiscountDTO;
 import com.tianji.api.dto.promotion.OrderCourseDTO;
 import com.tianji.api.dto.trade.OrderBasicDTO;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
+import com.tianji.common.autoconfigure.mq.RocketMqHelper;
 import com.tianji.common.constants.MqConstants;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
@@ -18,6 +19,7 @@ import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.exceptions.DbException;
 import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.CollUtils;
+import com.tianji.common.utils.MqUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.pay.sdk.dto.PayResultDTO;
 import com.tianji.trade.config.TradeProperties;
@@ -34,6 +36,8 @@ import com.tianji.trade.service.ICartService;
 import com.tianji.trade.service.IOrderDetailService;
 import com.tianji.trade.service.IOrderService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.common.message.Message;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +61,7 @@ import static com.tianji.trade.constants.TradeErrorInfo.ORDER_NOT_EXISTS;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements IOrderService {
 
     private final CourseClient courseClient;
@@ -65,6 +70,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final TradeProperties tradeProperties;
     private final RabbitMqHelper rabbitMqHelper;
     private final PromotionClient promotionClient;
+
+    private final RocketMqHelper rocketMqHelper;
 
     @Override
     @Transactional
@@ -167,16 +174,26 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         saveOrderAndDetails(order, CollUtils.singletonList(detail));
 
         // 5.发送MQ消息，通知报名成功
-        rabbitMqHelper.send(
-                MqConstants.Exchange.ORDER_EXCHANGE,
-                MqConstants.Key.ORDER_PAY_KEY,
-                OrderBasicDTO.builder()
-                        .orderId(orderId)
-                        .userId(userId)
-                        .courseIds(cIds)
-                        .finishTime(order.getFinishTime())
-                        .build()
-        );
+//        rabbitMqHelper.send(
+//                MqConstants.Exchange.ORDER_EXCHANGE,
+//                MqConstants.Key.ORDER_PAY_KEY,
+//                OrderBasicDTO.builder()
+//                        .orderId(orderId)
+//                        .userId(userId)
+//                        .courseIds(cIds)
+//                        .finishTime(order.getFinishTime())
+//                        .build()
+//
+//        );
+        OrderBasicDTO msg = OrderBasicDTO.builder()
+                .orderId(orderId)
+                .userId(userId)
+                .courseIds(cIds)
+                .finishTime(order.getFinishTime())
+                .build();
+        boolean isSuccess = rocketMqHelper.sendSync(MqConstants.Topic.COURSE_TOPIC, MqConstants.Tag.USER_COURSE_SAVE, msg);
+        log.info("发送MQ消息，通知报名成功，结果：{}", isSuccess);
+
         // 6.返回vo
         return PlaceOrderResultVO.builder()
                 .orderId(orderId)
@@ -420,6 +437,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     public static void main(String[] args) {
-        
+
     }
 }
