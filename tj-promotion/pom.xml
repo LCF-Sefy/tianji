@@ -148,7 +148,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.tianji.learning.LearningApplication</mainClass>
+                    <mainClass>com.tianji.promotion.PromotionApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>
