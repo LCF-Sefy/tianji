@@ -93,9 +93,17 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      */
     @Override
     public PageDTO<CouponPageVO> queryCouponPage(CouponQuery query) {
+
+        //获取当前登录用户
+        Long userId = UserContext.getUser();
+        if (userId == null){
+            throw new BadRequestException("用户需要登录才能查询");
+        }
+
         //1.分页条件查询查询优惠券表 Coupon
         Page<Coupon> page = this.lambdaQuery().eq(query.getType() != null, Coupon::getDiscountType, query.getType())
                 .eq(query.getStatus() != null, Coupon::getStatus, query.getStatus())
+                .eq( Coupon::getCreater, userId)
                 .like(StringUtils.isNotBlank(query.getName()), Coupon::getName, query.getName())
                 .page(query.toMpPageDefaultSortByCreateTimeDesc());
         List<Coupon> coupons = page.getRecords();

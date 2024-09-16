@@ -26,6 +26,8 @@ spring:
             refresh: false
           - data-id: shared-rocketmq.yaml # 共享rocketmq配置
             refresh: false
+          - data-id: shared-datasource.yaml # 数据源配置
+            refresh: false
 tj:
   swagger:
     enable: true

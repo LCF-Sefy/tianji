@@ -9,6 +9,9 @@ spring:
     active: dev
   application:
     name: promotion-service
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:shardingsphere-config.yaml
   cloud:
     nacos:
       config:
@@ -34,6 +37,8 @@ spring:
             refresh: false
           - data-id: shared-sentinel.yaml # 共享sentinel配置
             refresh: false
+#          - data-id: shared-datasource.yaml # 数据源配置
+
 # dubbo相关配置
 dubbo:
   application:

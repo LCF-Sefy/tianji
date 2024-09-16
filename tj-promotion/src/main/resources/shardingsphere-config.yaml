@@ -1,0 +1,69 @@
+# 数据源集合
+dataSources:
+  # 自定义数据源名称，可以是 ds_0 也可以叫 datasource_0 都可以
+  ds_0:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.150.101:3306/one_coupon_rebuild_0?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123
+  ds_1:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.150.101:3306/one_coupon_rebuild_1?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123
+
+rules:
+  - !SHARDING
+    tables: # 需要分片的数据库表集合
+      coupon: # 优惠券模板表
+        # 真实存在数据库中的物理表
+        actualDataNodes: ds_${0..1}.coupon_${0..15}
+        databaseStrategy: # 分库策略
+          standard: # 单分片键分库
+            shardingColumn: creater # 分片键
+            shardingAlgorithmName: coupon_template_database_mod # 库分片算法名称，对应 rules[0].shardingAlgorithms
+        tableStrategy: # 分表策略
+          standard: # 单分片键分表
+            shardingColumn: creater # 分片键
+            shardingAlgorithmName: coupon_template_table_mod # 表分片算法名称，对应 rules[0].shardingAlgorithms
+      user_coupon:
+        actualDataNodes: ds_${0..1}.user_coupon_${0..15}
+        databaseStrategy:
+          standard:
+            shardingColumn: user_id
+            shardingAlgorithmName: user_coupon_database_mod
+        tableStrategy:
+          standard:
+            shardingColumn: user_id
+            shardingAlgorithmName: user_coupon_table_mod
+    shardingAlgorithms: # 分片算法定义集合
+      coupon_template_database_mod: # 优惠券分库算法定义
+        type: CLASS_BASED # 根据自定义库分片算法类进行分片
+        props: # 分片相关属性
+          # 自定义库分片算法Class
+          algorithmClassName: com.tianji.promotion.sharding.admin.DBHashModShardingAlgorithm
+          sharding-count: 16 # 分片总数量
+          strategy: standard # 分片类型，单字段分片
+      coupon_template_table_mod: # 优惠券分表算法定义
+        type: CLASS_BASED # 根据自定义库分片算法类进行分片
+        props: # 分片相关属性
+          # 自定义表分片算法Class
+          algorithmClassName: com.tianji.promotion.sharding.admin.TableHashModShardingAlgorithm
+          strategy: standard # 分片类型，单字段分片
+      user_coupon_database_mod: # 用户优惠券分库算法定义
+        type: CLASS_BASED  # 根据自定义库分片算法类进行分片
+        props:  # 分片相关属性
+          algorithmClassName: com.tianji.promotion.sharding.user.DBHashModShardingAlgorithm
+          sharding-count: 32
+          strategy: standard
+      user_coupon_table_mod:
+        type: CLASS_BASED
+        props:
+          algorithmClassName: com.tianji.promotion.sharding.user.TableHashModShardingAlgorithm
+          strategy: standard
+
+props:
+  # 配置 ShardingSphere 默认打印 SQL 执行语句
+  sql-show: true
