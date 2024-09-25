@@ -3,7 +3,6 @@ package com.tianji.learning.mq.LikedRecord;
 import com.tianji.api.dto.msg.LikedTimesDTO;
 import com.tianji.api.dto.msg.LikedTimesMessage;
 import com.tianji.common.constants.MqConstants;
-import com.tianji.common.utils.JsonUtils;
 import com.tianji.learning.domain.po.InteractionReply;
 import com.tianji.learning.service.IInteractionReplyService;
 import lombok.RequiredArgsConstructor;

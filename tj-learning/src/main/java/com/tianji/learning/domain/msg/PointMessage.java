@@ -1,10 +1,5 @@
 package com.tianji.learning.domain.msg;
 
-import com.tianji.learning.enums.PointsRecordType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 
 public class PointMessage implements Serializable {

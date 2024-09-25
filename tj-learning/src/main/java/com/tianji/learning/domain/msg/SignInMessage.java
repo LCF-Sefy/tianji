@@ -1,7 +1,6 @@
 package com.tianji.learning.domain.msg;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

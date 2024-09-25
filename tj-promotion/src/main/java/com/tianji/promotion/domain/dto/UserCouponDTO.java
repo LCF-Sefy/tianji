@@ -4,6 +4,12 @@ import lombok.Data;
 
 @Data
 public class UserCouponDTO {
+
+    /**
+     * 商家id
+     */
+    private Long creater;
+
     /**
      * 用户id
      */

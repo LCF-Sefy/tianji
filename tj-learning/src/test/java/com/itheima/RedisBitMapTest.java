@@ -1,5 +1,6 @@
 package com.itheima;
 
+import com.tianji.common.cache.distribute.DistributedCacheService;
 import com.tianji.learning.LearningApplication;
 import com.tianji.learning.constants.RedisConstants;
 import org.junit.jupiter.api.Test;
@@ -9,15 +10,17 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootTest(classes = LearningApplication.class)
 public class RedisBitMapTest {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private DistributedCacheService distributedCacheService;
 
     @Test
     public void test() {
@@ -31,6 +34,14 @@ public class RedisBitMapTest {
             redisTemplate.opsForZSet().add(key, String.valueOf(i), i);
         }
 
+    }
 
+    @Test
+    public void test2(){
+        Map<String, String> map = new HashMap<>();
+        map.put("1", "1");
+        map.put("2", "2");
+        map.put("3", "3");
+        distributedCacheService.addHash("test", map);
     }
 }

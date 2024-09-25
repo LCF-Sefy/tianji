@@ -55,7 +55,25 @@ public class CouponController {
 
     @ApiOperation("查询发放中的优惠券")
     @GetMapping("list")
-    public List<CouponVO> queryIssuingCoupons(){
+    public List<CouponVO> queXryIssuingCoupons(){
         return couponService.queryIssuingCoupons();
+    }
+
+
+    /**
+     * 根据优惠券状态查询商家优惠券列表
+     * @param shopId
+     * @return
+     */
+    @ApiOperation("查询商家发放中的优惠券")
+    @GetMapping("list/{shopId}/{status}")
+    public List<CouponVO> list(@PathVariable("shopId") Long shopId ,@PathVariable("status") Integer status){
+        return couponService.getCouponList(shopId, status);
+    }
+
+    @ApiOperation("查询优惠券详情")
+    @GetMapping("detail/{shopId}/{couponId}")
+    public CouponVO detail(@PathVariable("shopId") Long shopId, @PathVariable("couponId") Long couponId){
+        return couponService.detail(shopId, couponId);
     }
 }

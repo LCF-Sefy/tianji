@@ -4,8 +4,12 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.tianji.promotion.enums.CouponStatus;
 import com.tianji.promotion.enums.DiscountType;
@@ -28,7 +32,7 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("coupon")
-@ApiModel(value="Coupon对象", description="优惠券的规则信息")
+@ApiModel(value = "Coupon对象", description = "优惠券的规则信息")
 public class Coupon implements Serializable {
 
     private static final long serialVersionUID = 1L;

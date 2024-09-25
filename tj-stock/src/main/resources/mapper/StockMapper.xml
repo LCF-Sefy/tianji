@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tianji.stock.mapper.StockMapper">
+
+    <sql id="Base_Column_List">
+        id, coupon_id, total_num, issue_num, create_time, update_time, creater, updater
+    </sql>
+
+    <update id="increaseInssueNum">
+        update coupon_stock set issue_num = issue_num + 1 where creater = #{creater} and coupon_id = #{couponId} and total_num > issue_num
+    </update>
+</mapper>

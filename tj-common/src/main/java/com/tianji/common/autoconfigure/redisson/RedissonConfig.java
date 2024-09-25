@@ -3,6 +3,7 @@ package com.tianji.common.autoconfigure.redisson;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.tianji.common.autoconfigure.redisson.aspect.LockAspect;
+import com.tianji.common.lock.redisson.RedissonLockFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -71,6 +72,12 @@ public class RedissonConfig {
         }
         // 3.创建Redisson客户端
         return Redisson.create(config);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RedissonLockFactory redissonLockFactory(){
+        return new RedissonLockFactory();
     }
 
     private String[] convert(List<String> nodesObject) {

@@ -2,4 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tianji.promotion.mapper.CouponMapper">
 
+    <sql id="Base_Column_List">
+        id, `name`, `specific`, discount_type, threshold_amount ,discount_value, max_discount_amount,term_days,term_end_time
+    </sql>
+
+    <select id="getByShopIdAndId" resultType="com.tianji.promotion.domain.po.Coupon">
+        select
+        <include refid="Base_Column_List"/>
+        from coupon where creater = #{shopId} and id = #{id}
+    </select>
+
+    <select id="getCouponListByShopIdAndStatus" resultType="com.tianji.promotion.domain.po.Coupon">
+        select <include refid="Base_Column_List"/>
+            from coupon where creater = #{shopId} and status = #{status}
+    </select>
 </mapper>

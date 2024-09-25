@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
  * rocketmq配置类
  */
 @Configuration
+@ConditionalOnClass(RocketMQTemplate.class)
 public class RocketMqConfig {
 
     @Autowired

@@ -17,26 +17,28 @@ spring:
       config:
         file-extension: yaml
         shared-configs: # 共享配置
-          - data-id: shared-spring.yaml # 共享spring配置
-            refresh: false
-          - data-id: shared-redis.yaml # 共享redis配置
-            refresh: false
-          - data-id: shared-mybatis.yaml # 共享mybatis配置
-            refresh: false
-          - data-id: shared-logs.yaml # 共享日志配置
-            refresh: false
-          - data-id: shared-feign.yaml # 共享feign配置
-            refresh: false
-          - data-id: shared-mq.yaml # 共享mq配置
-            refresh: false
-          - data-id: shared-xxljob.yaml # 共享xxljob配置
-            refresh: false
-          - data-id: shared-rocketmq.yaml # 共享rocketmq配置
-            refresh: false
-          - data-id: shared-seata.yaml # 共享seata配置
-            refresh: false
-          - data-id: shared-sentinel.yaml # 共享sentinel配置
-            refresh: false
+        - data-id: shared-spring.yaml # 共享spring配置
+          refresh: false
+#        - data-id: shared-redis.yaml # 共享redis配置
+#          refresh: false
+        - data-id: shared-redisCluster.yaml # 共享redisCluster配置
+          refresh: false
+        - data-id: shared-mybatis.yaml # 共享mybatis配置
+          refresh: false
+        - data-id: shared-logs.yaml # 共享日志配置
+          refresh: false
+        - data-id: shared-feign.yaml # 共享feign配置
+          refresh: false
+        - data-id: shared-mq.yaml # 共享mq配置
+          refresh: false
+        - data-id: shared-xxljob.yaml # 共享xxljob配置
+          refresh: false
+        - data-id: shared-rocketmq.yaml # 共享rocketmq配置
+          refresh: false
+        - data-id: shared-seata.yaml # 共享seata配置
+          refresh: false
+        - data-id: shared-sentinel.yaml # 共享sentinel配置
+          refresh: false
 #          - data-id: shared-datasource.yaml # 数据源配置
 
 # dubbo相关配置
@@ -50,7 +52,8 @@ dubbo:
     # 协议端口（ -1 表示自增端口，从 20880 开始）
     port: 20883
     id: dubbo
-
+  cloud:
+    subscribed-services: tj-stock,tj-learning         #订阅的服务
 tj:
   swagger:
     enable: true
@@ -74,3 +77,7 @@ tj:
     listener:
       retry:
         stateless: false # true无状态；false有状态。如果业务中包含事务，这里改为false
+
+rocketmq:
+  producer:
+    retry

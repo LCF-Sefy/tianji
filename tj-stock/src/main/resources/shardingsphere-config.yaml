@@ -1,0 +1,56 @@
+# 数据源集合
+dataSources:
+  # 自定义数据源名称，可以是 ds_0 也可以叫 datasource_0 都可以
+  ds_0:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.150.101:3306/coupon_stock_0?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123
+  ds_1:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.150.101:3306/coupon_stock_1?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123
+
+rules:
+  - !SHARDING
+    tables: # 需要分片的数据库表集合
+      coupon_stock: # 优惠券模板表
+        # 真实存在数据库中的物理表
+        actualDataNodes: ds_${0..1}.coupon_stock_${0..2}
+        databaseStrategy: # 分库策略
+          standard: # 单分片键分库
+            shardingColumn: coupon_id # 分片键：优惠券id
+            shardingAlgorithmName: coupon_stock_database_mod # 库分片算法名称，对应 rules[0].shardingAlgorithms
+        tableStrategy: # 分表策略
+          standard: # 单分片键分表
+            shardingColumn: coupon_id # 分片键
+            shardingAlgorithmName: coupon_stock_table_mod # 表分片算法名称，对应 rules[0].shardingAlgorithms
+        keyGenerateStrategy:
+            column: id
+            keyGeneratorName: snowflake
+    shardingAlgorithms: # 分片算法定义集合
+      coupon_stock_database_mod: # 优惠券库存分库算法定义
+        type: CLASS_BASED  # 根据自定义库分片算法类进行分片
+        props:  # 分片相关属性
+          algorithmClassName: com.tianji.stock.sharding.DBHashModShardingAlgorithm
+          sharding-count: 3
+          strategy: standard
+      coupon_stock_table_mod:
+        type: CLASS_BASED
+        props:
+          algorithmClassName: com.tianji.stock.sharding.TableHashModShardingAlgorithm
+          strategy: standard
+
+    keyGenerators:
+        snowflake:
+          type: SNOWFLAKE
+          props:
+            worker-id: 123
+props:
+  # 配置 ShardingSphere 默认打印 SQL 执行语句
+  sql-show: true
+
+

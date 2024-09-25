@@ -28,6 +28,9 @@ rules:
           standard: # 单分片键分表
             shardingColumn: creater # 分片键
             shardingAlgorithmName: coupon_template_table_mod # 表分片算法名称，对应 rules[0].shardingAlgorithms
+        keyGenerateStrategy:
+          column: id
+          keyGeneratorName: snowflake
       user_coupon:
         actualDataNodes: ds_${0..1}.user_coupon_${0..15}
         databaseStrategy:
@@ -38,6 +41,9 @@ rules:
           standard:
             shardingColumn: user_id
             shardingAlgorithmName: user_coupon_table_mod
+        keyGenerateStrategy:
+          column: id
+          keyGeneratorName: snowflake
     shardingAlgorithms: # 分片算法定义集合
       coupon_template_database_mod: # 优惠券分库算法定义
         type: CLASS_BASED # 根据自定义库分片算法类进行分片
@@ -64,6 +70,14 @@ rules:
           algorithmClassName: com.tianji.promotion.sharding.user.TableHashModShardingAlgorithm
           strategy: standard
 
+    keyGenerators:
+      snowflake:
+        type: SNOWFLAKE
+        props:
+          worker-id: 123
+
 props:
   # 配置 ShardingSphere 默认打印 SQL 执行语句
   sql-show: true
+
+

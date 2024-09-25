@@ -24,6 +24,7 @@
         <module>tj-data</module>
         <module>tj-remark</module>
         <module>tj-promotion</module>
+        <module>tj-stock</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -62,6 +63,7 @@
         <rocketmq-client-version>4.9.6</rocketmq-client-version>
         <rocketmq-starter>2.2.3</rocketmq-starter>
         <shardingsphere-jdbc-version>5.3.2</shardingsphere-jdbc-version>
+        <protostuff.version>1.7.4</protostuff.version>
     </properties>
     <!-- 对依赖包进行管理 -->
     <dependencyManagement>

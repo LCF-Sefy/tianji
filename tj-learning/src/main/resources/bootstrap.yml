@@ -16,7 +16,9 @@ spring:
         shared-configs: # 共享配置
           - data-id: shared-spring.yaml # 共享spring配置
             refresh: false
-          - data-id: shared-redis.yaml # 共享redis配置
+#          - data-id: shared-redis.yaml # 共享redis配置
+#            refresh: false
+          - data-id: shared-redisCluster.yaml # 共享redisCluster配置
             refresh: false
           - data-id: shared-mybatis.yaml # 共享mybatis配置
             refresh: false
@@ -46,6 +48,8 @@ dubbo:
     # 协议端口（ -1 表示自增端口，从 20880 开始）
     port: 20882
     id: dubbo
+  cloud:
+    subscribed-services:    # 订阅的服务（暂无）
 tj:
   swagger:
     enable: true

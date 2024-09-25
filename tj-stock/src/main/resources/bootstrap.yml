@@ -1,0 +1,105 @@
+server:
+  port: 8070  #端口
+  tomcat:
+    uri-encoding: UTF-8   #服务编码
+spring:
+  main:
+    allow-circular-references: true # 允许循环依赖
+  profiles:
+    active: dev
+  application:
+    name: stock-service
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:shardingsphere-config.yaml
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        shared-configs: # 共享配置
+          - data-id: shared-spring.yaml # 共享spring配置
+            refresh: false
+#          - data-id: shared-redis.yaml # 共享redis配置
+#            refresh: false
+          - data-id: shared-redisCluster.yaml # 共享redisCluster配置
+            refresh: false
+          - data-id: shared-mybatis.yaml # 共享mybatis配置
+            refresh: false
+          - data-id: shared-logs.yaml # 共享日志配置
+            refresh: false
+          - data-id: shared-feign.yaml # 共享feign配置
+            refresh: false
+          - data-id: shared-mq.yaml # 共享mq配置
+            refresh: false
+          - data-id: shared-xxljob.yaml # 共享xxljob配置
+            refresh: false
+          - data-id: shared-rocketmq.yaml # 共享rocketmq配置
+            refresh: false
+          - data-id: shared-seata.yaml # 共享seata配置
+            refresh: false
+          - data-id: shared-sentinel.yaml # 共享sentinel配置
+            refresh: false
+  #          - data-id: shared-datasource.yaml # 数据源配置
+#  shardingsphere:
+#    props:
+#      sql:
+#        show: true
+#    datasource:
+#      names: ds0,ds1
+#      ds0:
+#        driver-class-name: com.mysql.cj.jdbc.Driver
+#        jdbc-url: jdbc:mysql://192.168.150.101:3306/coupon_stock_0?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT&allowPublicKeyRetrieval=true
+#        username: root
+#        password: 123
+#        type: com.zaxxer.hikari.HikariDataSource
+#      ds1:
+#        driver-class-name: com.mysql.cj.jdbc.Driver
+#        jdbc-url: jdbc:mysql://192.168.150.101:3306/coupon_stock_1?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT&allowPublicKeyRetrieval=true
+#        username: root
+#        password: 123
+#        type: com.zaxxer.hikari.HikariDataSource
+#    sharding:
+#      tables:
+#        coupon_stock:
+#          actual-data-nodes: ds$->{0..1}.coupon_stock_$->{0..2}
+#          table-strategy:
+#            standard:
+#              sharding-column: coupon_id
+#              precise-algorithm-class-name: com.tianji.stock.sharding.DBShardingAlgorithm
+#          database-strategy:
+#            inline:
+#              sharding-column: coupon_id
+#              algorithm-expression: ds$->{coupon_id % 2}
+#          key-generator:
+#            column: id
+#            type: SNOWFLAKE
+
+
+dubbo:
+  application:
+    name: ${spring.application.name}
+  registry:
+    address: nacos://192.168.150.101:8848
+  protocol:
+    name: dubbo
+    # 协议端口（ -1 表示自增端口，从 20880 开始）
+    port: 20884
+    id: dubbo
+  cloud:
+    subscribed-services:      # 订阅的服务（暂无）
+tj:
+  swagger:
+    enable: true
+    enableResponseWrap: true
+    package-path: com.tianji.stock.controller
+    title: 天机学堂 - 库存中心接口文档
+    description: 优惠券库存
+    contact-name: 传智教育·研究院
+    contact-url: http://www.itcast.cn/
+    contact-email: zhanghuyi@itcast.cn
+    version: v1.0
+  jdbc:
+    database: tj_stock
+  auth:
+    resource:
+      enable: true

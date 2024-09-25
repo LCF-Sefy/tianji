@@ -34,13 +34,13 @@ public interface IUserCouponService extends IService<UserCoupon> {
      */
     void exchangeCoupon(String code);
 
-    /**
-     * 校验是否超出优惠券的每个人限领取数量 和 优惠券的已发放数量 + 1 和 生成用户券
-     * @param userId
-     * @param coupon
-     * @param serialNum
-     */
-    public void checkAndCreateUserCoupon(Long userId, Coupon coupon, Long serialNum);
+//    /**
+//     * 校验是否超出优惠券的每个人限领取数量 和 优惠券的已发放数量 + 1 和 生成用户券
+//     * @param userId
+//     * @param coupon
+//     * @param serialNum
+//     */
+//    public void checkAndCreateUserCoupon(Long userId, Coupon coupon, Long serialNum);
 
     void checkAndCreateUserCouponNew(UserCouponDTO msg);
 
@@ -50,4 +50,11 @@ public interface IUserCouponService extends IService<UserCoupon> {
      * @return
      */
     List<CouponDiscountDTO> findDiscountSolution(List<OrderCourseDTO> orderCourses);
+
+    /**
+     * 根据shopId 和 id领取优惠券
+     * @param shopId  商家id（creater）
+     * @param id      优惠券id
+     */
+    void receiveCouponByShopIdAndId(Long shopId, Long id);
 }

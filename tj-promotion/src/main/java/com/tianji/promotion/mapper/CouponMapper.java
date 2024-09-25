@@ -2,8 +2,12 @@ package com.tianji.promotion.mapper;
 
 import com.tianji.promotion.domain.po.Coupon;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.tianji.promotion.domain.vo.CouponVO;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+
+import java.util.List;
 
 /**
  * <p>
@@ -20,6 +24,13 @@ public interface CouponMapper extends BaseMapper<Coupon> {
      *
      * @param id
      */
-    @Update("update coupon set issue_num = issue_num + 1 where id = #{id}")
-    int incrIssNum(@Param("id") Long id);
+    @Update("update coupon set issue_num = issue_num + 1 where creater = #{creater} and id = #{id}")
+    int incrIssNum(@Param("creater") Long creater, @Param("id") Long id);
+
+    @Select("select * from coupon where creater = #{creater} and id = #{id}")
+    Coupon selectByCreaterAndIdCoupon(@Param("creater") Long creater, @Param("id") Long id);
+
+    Coupon getByShopIdAndId(@Param("shopId") Long shopId, @Param("id") Long id);
+
+    List<Coupon> getCouponListByShopIdAndStatus(@Param("shopId") Long shopId, @Param("status") Integer status);
 }

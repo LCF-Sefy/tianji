@@ -21,6 +21,7 @@ import com.tianji.promotion.domain.po.Coupon;
 import com.tianji.promotion.domain.po.CouponScope;
 import com.tianji.promotion.domain.po.ExchangeCode;
 import com.tianji.promotion.domain.po.UserCoupon;
+import com.tianji.promotion.dubbo.client.CouponStockClient;
 import com.tianji.promotion.enums.ExchangeCodeStatus;
 import com.tianji.promotion.mapper.CouponMapper;
 import com.tianji.promotion.mapper.UserCouponMapper;
@@ -28,9 +29,11 @@ import com.tianji.promotion.service.ICouponScopeService;
 import com.tianji.promotion.service.IExchangeCodeService;
 import com.tianji.promotion.service.IUserCouponService;
 import com.tianji.promotion.utils.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -72,6 +75,9 @@ public class UserCouponRedissonLuaMqAnnotationServiceImpl extends ServiceImpl<Us
     private final ICouponScopeService couponScopeService;
     private final Executor calculateSolutionExecutor;
 
+    @Autowired
+    private CouponStockClient couponStockClient;
+
     private static final RedisScript<Long> RECEIVE_COUPON_SCRIPT;
     private static final RedisScript<String> EXCHANGE_COUPON_SCRIPT;
 
@@ -83,19 +89,52 @@ public class UserCouponRedissonLuaMqAnnotationServiceImpl extends ServiceImpl<Us
     private final RocketMqHelper rocketMqHelper;
 
     /**
-     * 领取优惠券
+     * 根据shopId 和 id领取优惠券
      *
+     * @param shopId 商家id（creater）
+     * @param id     优惠券id
+     */
+    @Override
+    public void receiveCouponByShopIdAndId(Long shopId, Long id) {
+        //先判断缓存是否存在（缓存穿透缓存击穿）TODO
+
+        // 1.执行LUA脚本，判断结果
+        // 1.1.准备参数
+        String key1 = String.format(PromotionConstants.SHOP_COUPON_CHECK_KEY_FORMAT, shopId, id);
+        String key2 = String.format(PromotionConstants.SHOP_COUPON_ISSUED_KEY_FORMAT, shopId, id);
+        Long userId = UserContext.getUser();
+        // 1.2.执行脚本
+        Long r = stringRedisTemplate.execute(RECEIVE_COUPON_SCRIPT, List.of(key1, key2), userId.toString());
+        int result = NumberUtils.null2Zero(r).intValue();
+        if (result != 0) {
+            // 结果大于0，说明出现异常
+            throw new BizIllegalException(PromotionConstants.RECEIVE_COUPON_ERROR_MSG[result - 1]);
+        }
+
+        //2.发送消息到mq 消息的内容 userId  couponId creater
+        UserCouponDTO userCoupon = new UserCouponDTO();
+        userCoupon.setCouponId(id);
+        userCoupon.setCreater(shopId);
+        userCoupon.setUserId(userId);
+        boolean isSuccess = rocketMqHelper.sendSync(MqConstants.Topic.PROMOTION_TOPIC, userCoupon);
+        log.info("发送领取优惠券消息到mq，是否成功：{}", isSuccess);
+    }
+
+
+    /**
+     * 领取优惠券
+     *（暂不用）
      * @param id
      */
     @Override
     public void receiveCoupon(Long id) {
         // 1.执行LUA脚本，判断结果
         // 1.1.准备参数
-        String key1 = PromotionConstants.COUPON_CACHE_KEY_PREFIX + id;
-        String key2 = PromotionConstants.USER_COUPON_CACHE_KEY_PREFIX + id;
+//        String key1 = String.format(PromotionConstants.SHOP_COUPON_CHECK_KEY_FORMAT, shopId, id);
+//        String key2 = String.format(PromotionConstants.SHOP_COUPON_ISSUED_KEY_FORMAT, shopId, id);
         Long userId = UserContext.getUser();
         // 1.2.执行脚本
-        Long r = stringRedisTemplate.execute(RECEIVE_COUPON_SCRIPT, List.of(key1, key2), userId.toString());
+        Long r = stringRedisTemplate.execute(RECEIVE_COUPON_SCRIPT, List.of("1", "2"), userId.toString());
         int result = NumberUtils.null2Zero(r).intValue();
         if (result != 0) {
             // 结果大于0，说明出现异常
@@ -121,75 +160,76 @@ public class UserCouponRedissonLuaMqAnnotationServiceImpl extends ServiceImpl<Us
         String key = PromotionConstants.COUPON_CACHE_KEY_PREFIX + id;
         //2.从redis中获取数据
         Map<Object, Object> entries = stringRedisTemplate.opsForHash().entries(key);
-        Coupon coupon = BeanUtils.mapToBean(entries, Coupon.class, false, CopyOptions.create());
-        return coupon;
+        return BeanUtils.mapToBean(entries, Coupon.class, false, CopyOptions.create());
     }
 
 
-    /**
-     * 校验是否超出优惠券的每个人限领取数量 和 优惠券的已发放数量 + 1 和 生成用户券
-     * 第一步：查询当前用户对于该优惠券的已领取数量
-     * 第二步：判断是否超出限领数量
-     * 第三步：如果没有超出限领数量，则更新该优惠券的已发放数量 +1  （采用乐观锁解决超卖问题）
-     * 第四步：如果没有超出限领数量，则生成用户券
-     * 这个方法在这里没用到
-     *
-     * @param userId
-     * @param coupon
-     * @param exchangeCodeId
-     */
-    @Transactional
-    @MyLock(name = "lock:coupon:uid:#{userId}",
-            lockType = MyLockType.RE_ENTRANT_LOCK,
-            lockStrategy = MyLockStrategy.FAIL_AFTER_RETRY_TIMEOUT)             //MyLock注解设置了执行顺序为0，所以会在事务开启之前加锁
-    public void checkAndCreateUserCoupon(Long userId, Coupon coupon, Long exchangeCodeId) {
-
-        Integer count = this.lambdaQuery()
-                .eq(UserCoupon::getUserId, userId)
-                .eq(UserCoupon::getCouponId, coupon.getId())
-                .count();
-        if (count != null && count >= coupon.getUserLimit()) {
-            throw new BadRequestException("已达到领取上限");
-        }
-
-        //2.优惠券的已发送数量+1    这里采用乐观锁解决超卖问题
-        int result = couponMapper.incrIssNum(coupon.getId());//采用这种方法，考虑并发控制，后期仍需要修改
-        if (result == 0) {
-            //更新失败，说明库存不足（已经领取完）
-            throw new BizIllegalException("优惠券库存不足！");
-        }
-
-        //3.生成用户券
-        saveUserCoupon(userId, coupon);
-
-        //4.更新兑换码的状态   db
-        if (exchangeCodeId != null) {
-            exchangeCodeService.lambdaUpdate()
-                    .set(ExchangeCode::getStatus, ExchangeCodeStatus.USED)
-                    .set(ExchangeCode::getUserId, userId)
-                    .eq(ExchangeCode::getId, exchangeCodeId)
-                    .update();
-        }
-    }
+//    /**
+//     * 校验是否超出优惠券的每个人限领取数量 和 优惠券的已发放数量 + 1 和 生成用户券
+//     * 第一步：查询当前用户对于该优惠券的已领取数量
+//     * 第二步：判断是否超出限领数量
+//     * 第三步：如果没有超出限领数量，则更新该优惠券的已发放数量 +1  （采用乐观锁解决超卖问题）
+//     * 第四步：如果没有超出限领数量，则生成用户券
+//     * 这个方法在这里没用到
+//     *
+//     * @param userId
+//     * @param coupon
+//     * @param exchangeCodeId
+//     */
+//    @Transactional
+//    @MyLock(name = "lock:coupon:uid:#{userId}",
+//            lockType = MyLockType.RE_ENTRANT_LOCK,
+//            lockStrategy = MyLockStrategy.FAIL_AFTER_RETRY_TIMEOUT)             //MyLock注解设置了执行顺序为0，所以会在事务开启之前加锁
+//    public void checkAndCreateUserCoupon(Long userId, Coupon coupon, Long exchangeCodeId) {
+//
+//        Integer count = this.lambdaQuery()
+//                .eq(UserCoupon::getUserId, userId)
+//                .eq(UserCoupon::getCouponId, coupon.getId())
+//                .count();
+//        if (count != null && count >= coupon.getUserLimit()) {
+//            throw new BadRequestException("已达到领取上限");
+//        }
+//
+//        //2.优惠券的已发送数量+1    这里采用乐观锁解决超卖问题
+//        int result = couponMapper.incrIssNum(coupon.getId());//采用这种方法，考虑并发控制，后期仍需要修改
+//        if (result == 0) {
+//            //更新失败，说明库存不足（已经领取完）
+//            throw new BizIllegalException("优惠券库存不足！");
+//        }
+//
+//        //3.生成用户券
+//        saveUserCoupon(userId, coupon);
+//
+//        //4.更新兑换码的状态   db
+//        if (exchangeCodeId != null) {
+//            exchangeCodeService.lambdaUpdate()
+//                    .set(ExchangeCode::getStatus, ExchangeCodeStatus.USED)
+//                    .set(ExchangeCode::getUserId, userId)
+//                    .eq(ExchangeCode::getId, exchangeCodeId)
+//                    .update();
+//        }
+//    }
 
 
     //    @MyLock(name = "lock:coupon:uid:#{userId}",
 //            lockType = MyLockType.RE_ENTRANT_LOCK,
 //            lockStrategy = MyLockStrategy.FAIL_AFTER_RETRY_TIMEOUT)             //MyLock注解设置了执行顺序为0，所以会在事务开启之前加锁
-    @Transactional
     @Override
+//    @GlobalTransactional(rollbackFor = Exception.class)  //应该采用分布式事务的，但是由于sharding-Sphere和seata存在bug，暂时注释掉
     public void checkAndCreateUserCouponNew(UserCouponDTO msg) {
 
-        //从db中查询优惠券信息
-        Coupon coupon = couponMapper.selectById(msg.getCouponId());
+        //1.从db中查询优惠券基本信息
+        Coupon coupon = couponMapper.selectByCreaterAndIdCoupon(msg.getCreater(), msg.getCouponId());
         if (coupon == null) {
-            return;
+            //优惠券不存在
+            throw new BizIllegalException("优惠券不存在！");
         }
-        //2.优惠券的已发送数量+1    这里采用乐观锁解决超卖问题
-        int result = couponMapper.incrIssNum(coupon.getId());//采用这种方法，考虑并发控制，后期仍需要修改
+
+        //2.远程调用stock服务的rpc接口扣减优惠券的库存    这里采用乐观锁解决超卖问题
+        int result = couponStockClient.increaseInssueNum(msg.getCreater(), msg.getCouponId());
         if (result == 0) {
             //更新失败，说明库存不足（已经领取完）
-            return;
+            throw new BizIllegalException("库存不足！");
         }
 
         //3.生成用户券

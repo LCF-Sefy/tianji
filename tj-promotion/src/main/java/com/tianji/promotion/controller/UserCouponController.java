@@ -45,6 +45,17 @@ public class UserCouponController {
         userCouponService.receiveCoupon(id);
     }
 
+    /**
+     * 根据shopId 和 id领取优惠券
+     * @param shopId  商家id（creater）
+     * @param id      优惠券id
+     */
+    @ApiOperation("领取优惠劵升级版")
+    @PostMapping("receive/{shopId}/{id}")
+    public void receiveCoupon(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id ) {
+        userCouponService.receiveCouponByShopIdAndId(shopId, id);
+    }
+
     @ApiOperation("兑换码兑换优惠券")
     @PostMapping("/{code}/exchange")
     public void exchangeCoupon(@PathVariable("code") String code) {
@@ -90,6 +101,7 @@ public class UserCouponController {
 
     /**
      * 测试sentinel限流
+     *
      * @return
      */
     @GetMapping("/limit")
