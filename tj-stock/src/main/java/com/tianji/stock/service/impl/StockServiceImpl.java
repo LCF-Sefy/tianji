@@ -20,6 +20,7 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, CouponStock> impl
     @Autowired
     private StockMapper stockMapper;
 
+
     /**
      * 商家设置优惠券库存
      *
