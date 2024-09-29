@@ -2,7 +2,7 @@ package com.tianji.api.interfaces.learning;
 
 public interface LearningDubboService {
 
-    void sayHello(String name);
+    String sayHello(String name);
 
-    void testSeate();
+    void testSeata();
 }

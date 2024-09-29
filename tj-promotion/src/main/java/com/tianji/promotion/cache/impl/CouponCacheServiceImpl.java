@@ -146,11 +146,10 @@ public class CouponCacheServiceImpl implements CouponCacheService {
             if (coupon == null) {
                 //数据库中不存在
                 couponBusinessCache = new CouponBusinessCache<CouponVO>().notExist();
-                return couponBusinessCache;
             } else {
                 couponBusinessCache = new CouponBusinessCache<CouponVO>().with(BeanUtils.copyBean(coupon, CouponVO.class));
             }
-            //将从数据库中查询到的数据更新到分布式缓存
+            //将从数据库中查询到的数据更新到分布式缓存（如果数据库中不存在，会缓存一个没有数据的对象，解决缓存穿透）
             distributedCacheService.put(key, couponBusinessCache, PromotionConstants.FIVE_MINUTES);
             logger.info("商家:{}的优惠券:{}的分布式缓存已经更新", shopId, couponId);
             return couponBusinessCache;

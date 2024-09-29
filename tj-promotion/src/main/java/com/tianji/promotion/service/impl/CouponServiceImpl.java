@@ -181,6 +181,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         this.updateById(tmp);
 
         //5.如果优惠券是立刻发放，将优惠券存入redis 的hash结构（优惠券id、领券的开始时间和结束时间、发行的总数量、限领数量）
+        //TODO：考虑是否将库存分片
         if (isBeginIssue) {
             Long shopId = UserContext.getUser();
             String key = String.format(PromotionConstants.SHOP_COUPON_CHECK_KEY_FORMAT, shopId, id);//"prs:check:coupon:商家id:优惠券id"
@@ -189,11 +190,13 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
 //            map.put("issueEndTime", String.valueOf(DateUtils.toEpochMilli(dto.getIssueEndTime())));
 //            map.put("totalNum", String.valueOf(coupon.getTotalNum()));
 //            map.put("userLimit", String.valueOf(coupon.getUserLimit()));
+
             CouponCacheVO cacheVO = BeanUtils.copyBean(coupon, CouponCacheVO.class);
             cacheVO.setIssueBeginTime(tmp.getIssueBeginTime());
             cacheVO.setIssueEndTime(tmp.getIssueEndTime());
             cacheVO.setTermDays(tmp.getTermDays());
             cacheVO.setTermEndTime(tmp.getTermBeginTime());
+            cacheVO.setInitNum(coupon.getTotalNum());
             Map<String, String> map = cacheVO.toMap();
             distributedCacheService.addHash(key, map);
 
@@ -213,39 +216,50 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         }
     }
 
-    /**
-     * 查询当前商家正在发放中的优惠券（升级版） 走缓存
-     *
-     * @param shopId 商家id（creater）
-     * @return
-     */
-    @Override
-    public List<CouponVO> queryIssuingCouponsByshopId(Long shopId) {
-        //1.校验参数
-        if (shopId == null) {
-            throw new BadRequestException("商家id不能为空");
+    private Map<Integer, Integer> calculateBuckets(Integer totalNum, int bucketNum) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        int perBucketNum = totalNum / bucketNum;
+        int lastBucketNum = totalNum - perBucketNum * (bucketNum - 1);
+        for (int i = 0; i < bucketNum - 1; i++) {
+            map.put(i, perBucketNum);
         }
-        //2.查询缓存 TODO 缓存穿透缓存击穿
-        String key = PromotionConstants.SHOP_COUPON_CACHE_KEY_PREFIX + shopId;  //prs:shop:coupon:商家id
-        String jsonStr = distributedCacheService.getString(key);
-        List<CouponVO> couponVOList = JsonUtils.toList(jsonStr, CouponVO.class);
-
-        if (couponVOList.isEmpty()) {
-            throw new BizIllegalException("当前商家不存在优惠券");
-        }
-        couponVOList.forEach(coupon -> {
-            //prs:coupon:商家id:优惠券id
-            String couponKey = PromotionConstants.COUPON_CACHE_KEY_PREFIX + shopId + ":" + coupon.getId();
-            String userCouponKey = String.format(PromotionConstants.SHOP_COUPON_ISSUED_KEY_FORMAT,shopId, coupon.getId());
-            String totalNum = String.valueOf(distributedCacheService.getObject(couponKey, "totalNum"));
-            String userLimit = String.valueOf(distributedCacheService.getObject(couponKey, "userLimit"));
-            Object obj = distributedCacheService.getObject(userCouponKey, UserContext.getUser().toString());
-            String received = ObjectUtils.isNull(obj) ? "0" : String.valueOf(obj);
-            coupon.setAvailable(Integer.parseInt(totalNum) > 0 && Integer.parseInt(received) < Integer.parseInt(userLimit));
-        });
-
-        return couponVOList;
+        map.put(bucketNum - 1, lastBucketNum);
+        return map;
     }
+
+//    /**
+//     * 查询当前商家正在发放中的优惠券（升级版） 走缓存
+//     *
+//     * @param shopId 商家id（creater）
+//     * @return
+//     */
+//    @Override
+//    public List<CouponVO> queryIssuingCouponsByshopId(Long shopId) {
+//        //1.校验参数
+//        if (shopId == null) {
+//            throw new BadRequestException("商家id不能为空");
+//        }
+//        //2.查询缓存 TODO 缓存穿透缓存击穿
+//        String key = PromotionConstants.SHOP_COUPON_CACHE_KEY_PREFIX + shopId;  //prs:shop:coupon:商家id
+//        String jsonStr = distributedCacheService.getString(key);
+//        List<CouponVO> couponVOList = JsonUtils.toList(jsonStr, CouponVO.class);
+//
+//        if (couponVOList.isEmpty()) {
+//            throw new BizIllegalException("当前商家不存在优惠券");
+//        }
+//        couponVOList.forEach(coupon -> {
+//            //prs:coupon:商家id:优惠券id
+//            String couponKey = PromotionConstants.COUPON_CACHE_KEY_PREFIX + shopId + ":" + coupon.getId();
+//            String userCouponKey = String.format(PromotionConstants.SHOP_COUPON_ISSUED_KEY_FORMAT, shopId, coupon.getId());
+//            String totalNum = String.valueOf(distributedCacheService.getObject(couponKey, "totalNum"));
+//            String userLimit = String.valueOf(distributedCacheService.getObject(couponKey, "userLimit"));
+//            Object obj = distributedCacheService.getObject(userCouponKey, UserContext.getUser().toString());
+//            String received = ObjectUtils.isNull(obj) ? "0" : String.valueOf(obj);
+//            coupon.setAvailable(Integer.parseInt(totalNum) > 0 && Integer.parseInt(received) < Integer.parseInt(userLimit));
+//        });
+//
+//        return couponVOList;
+//    }
 
     /**
      * 查询优惠券详情
@@ -256,15 +270,15 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      */
     @Override
     public CouponVO detail(Long shopId, Long couponId) {
-        if (shopId == null || couponId == null){
+        if (shopId == null || couponId == null) {
             throw new BadRequestException("参数不能为空");
         }
         //从缓存中获取数据
         CouponBusinessCache<CouponVO> couponBusinessCache = couponCacheService.getCachedCouponDetail(shopId, couponId);
-        if(couponBusinessCache.isRetryLater()){
+        if (couponBusinessCache.isRetryLater()) {
             throw new BizIllegalException("当前访问人数太多，请稍后再试");
         }
-        if (!couponBusinessCache.isExist()){
+        if (!couponBusinessCache.isExist()) {
             throw new BizIllegalException("当前优惠券不存在");
         }
         return couponBusinessCache.getData();
@@ -279,15 +293,15 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      */
     @Override
     public List<CouponVO> getCouponList(Long shopId, Integer status) {
-        if (shopId == null || status == null){
+        if (shopId == null || status == null) {
             throw new BadRequestException("参数不能为空");
         }
         //从缓存中获取数据
         CouponBusinessCache<List<CouponVO>> cachedCouponList = couponListCacheService.getCachedCouponList(shopId, status);
-        if(cachedCouponList.isRetryLater()){
+        if (cachedCouponList.isRetryLater()) {
             throw new BizIllegalException("当前访问人数太多，请稍后再试");
         }
-        if (!cachedCouponList.isExist()){
+        if (!cachedCouponList.isExist()) {
             throw new BizIllegalException("该商家暂时没有优惠券活动哦");
         }
         return cachedCouponList.getData();

@@ -38,6 +38,7 @@ public interface DistributedCacheService {
 
     void put(String key, Object value, long expireTime);
 
+
     <T> T getObject(String key, Class<T> targetClass);
 
     Object getObject(String key);
@@ -59,6 +60,7 @@ public interface DistributedCacheService {
     Boolean isMemberSet(String key, Object o);
 
     void addHash(String key, Map<String, String> map);
+
 
     void addHash(String key, String hashKey, String score);
 

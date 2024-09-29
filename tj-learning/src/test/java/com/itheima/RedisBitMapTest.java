@@ -38,10 +38,10 @@ public class RedisBitMapTest {
 
     @Test
     public void test2(){
-        Map<String, String> map = new HashMap<>();
-        map.put("1", "1");
-        map.put("2", "2");
-        map.put("3", "3");
-        distributedCacheService.addHash("test", map);
+        Map<String, String> keyValues = new HashMap<>();
+        keyValues.put("key1{1}", "value1");
+        keyValues.put("key2{1}", "value2");
+        keyValues.put("key3{1}", "value3");
+        redisTemplate.opsForValue().multiSet(keyValues);
     }
 }

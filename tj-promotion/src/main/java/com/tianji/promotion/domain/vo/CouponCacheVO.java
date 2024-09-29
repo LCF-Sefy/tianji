@@ -25,31 +25,34 @@ public class CouponCacheVO {
     @ApiModelProperty("是否限定使用范围")
     private Boolean specific;
 
-    @ApiModelProperty("优惠券类型，1：每满减，2：折扣，3：无门槛，4：普通满减")
-    private DiscountType discountType;
-    @ApiModelProperty("折扣门槛，0代表无门槛")
-    private Integer thresholdAmount;
-    @ApiModelProperty("折扣值，满减填抵扣金额；打折填折扣值：80标示打8折")
-    private Integer discountValue;
-    @ApiModelProperty("最大优惠金额")
-    private Integer maxDiscountAmount;
+//    @ApiModelProperty("优惠券类型，1：每满减，2：折扣，3：无门槛，4：普通满减")
+//    private DiscountType discountType;
+//    @ApiModelProperty("折扣门槛，0代表无门槛")
+//    private Integer thresholdAmount;
+//    @ApiModelProperty("折扣值，满减填抵扣金额；打折填折扣值：80标示打8折")
+//    private Integer discountValue;
+//    @ApiModelProperty("最大优惠金额")
+//    private Integer maxDiscountAmount;
 
     @ApiModelProperty("有效天数")
     private Integer termDays;
     @ApiModelProperty("使用有效期结束时间")
     private LocalDateTime termEndTime;
 
-    @ApiModelProperty("是否可以领取")
-    private Boolean available;
+//    @ApiModelProperty("是否可以领取")
+//    private Boolean available;
 
-    @ApiModelProperty("是否可以使用")
-    private Boolean received;
+//    @ApiModelProperty("是否可以使用")
+//    private Boolean received;
 
     @ApiModelProperty(value = "每个人限领的数量，默认1")
     private Integer userLimit;
 
-    @ApiModelProperty(value = "总数量，不超过5000")
+    @ApiModelProperty(value = "所剩下的库存数量")
     private Integer totalNum;
+
+    @ApiModelProperty(value = "初始数量")
+    private Integer initNum;
 
     @ApiModelProperty(value = "开始发放时间")
     private LocalDateTime issueBeginTime;

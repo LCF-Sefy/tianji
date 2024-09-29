@@ -48,6 +48,7 @@ public class RedisCacheService implements DistributedCacheService {
             return;
         }
         redisTemplate.opsForValue().set(key, value);
+
     }
 
     @Override
@@ -160,6 +161,7 @@ public class RedisCacheService implements DistributedCacheService {
     public void addHash(String key, Map<String, String> map) {
         stringRedisTemplate.opsForHash().putAll(key, map);
     }
+
 
 
 

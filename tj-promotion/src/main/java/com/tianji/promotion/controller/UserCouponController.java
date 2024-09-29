@@ -6,6 +6,7 @@ import com.tianji.api.interfaces.learning.LearningDubboService;
 import com.tianji.promotion.domain.dto.CouponDiscountDTO;
 import com.tianji.promotion.domain.dto.CouponFormDTO;
 import com.tianji.promotion.domain.dto.OrderCourseDTO;
+import com.tianji.promotion.dubbo.client.LearningClient;
 import com.tianji.promotion.enums.DiscountType;
 import com.tianji.promotion.enums.ObtainType;
 import com.tianji.promotion.service.ICouponService;
@@ -15,6 +16,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,8 +38,8 @@ public class UserCouponController {
     private final IUserCouponService userCouponService;
     private final ICouponService couponService;
 
-    @DubboReference(version = "1.0.0")
-    private LearningDubboService learningDubboService;
+    @Autowired
+    private LearningClient learningClient;
 
     @ApiOperation("领取优惠劵")
     @PostMapping("{id}/receive")
@@ -47,12 +49,13 @@ public class UserCouponController {
 
     /**
      * 根据shopId 和 id领取优惠券
-     * @param shopId  商家id（creater）
-     * @param id      优惠券id
+     *
+     * @param shopId 商家id（creater）
+     * @param id     优惠券id
      */
     @ApiOperation("领取优惠劵升级版")
     @PostMapping("receive/{shopId}/{id}")
-    public void receiveCoupon(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id ) {
+    public void receiveCoupon(@PathVariable("shopId") Long shopId, @PathVariable("id") Long id) {
         userCouponService.receiveCouponByShopIdAndId(shopId, id);
     }
 
@@ -76,8 +79,9 @@ public class UserCouponController {
      * 测试dubbo
      */
     @GetMapping("/hello")
-    public void sayhello() {
-        learningDubboService.sayHello("超凡");
+    public void sayhello() throws InterruptedException {
+        String ans = learningClient.sayHello("超凡");
+        System.out.println("ans = " + ans);
     }
 
     /**
@@ -96,7 +100,7 @@ public class UserCouponController {
         dto.setMaxDiscountAmount(0);
         dto.setObtainWay(ObtainType.PUBLIC);
         couponService.saveCoupon(dto);
-        learningDubboService.testSeate();
+        learningClient.testSeata();
     }
 
     /**

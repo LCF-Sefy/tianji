@@ -9,4 +9,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
  com.tianji.common.autoconfigure.xxljob.XxlJobConfig, \
  com.tianji.common.autoconfigure.mq.RocketMqConfig, \
  com.tianji.common.autoconfigure.cache.RedisConfig, \
- com.tianji.common.autoconfigure.cache.LocalCacheConfig
+ com.tianji.common.autoconfigure.cache.LocalCacheConfig, \
+ com.tianji.common.autoconfigure.ratelimite.LimiterConfig

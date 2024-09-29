@@ -98,19 +98,21 @@ public class UserCouponRedissonLuaMqAnnotationServiceImpl extends ServiceImpl<Us
     public void receiveCouponByShopIdAndId(Long shopId, Long id) {
         //先判断缓存是否存在（缓存穿透缓存击穿）TODO
 
+
         // 1.执行LUA脚本，判断结果
         // 1.1.准备参数
         String key1 = String.format(PromotionConstants.SHOP_COUPON_CHECK_KEY_FORMAT, shopId, id);
         String key2 = String.format(PromotionConstants.SHOP_COUPON_ISSUED_KEY_FORMAT, shopId, id);
         Long userId = UserContext.getUser();
+        //计算userId的hash值
+        int hashCode = userId.hashCode();
         // 1.2.执行脚本
-        Long r = stringRedisTemplate.execute(RECEIVE_COUPON_SCRIPT, List.of(key1, key2), userId.toString());
+        Long r = stringRedisTemplate.execute(RECEIVE_COUPON_SCRIPT, List.of(key1, key2), userId.toString(), Integer.toString(hashCode));
         int result = NumberUtils.null2Zero(r).intValue();
         if (result != 0) {
             // 结果大于0，说明出现异常
             throw new BizIllegalException(PromotionConstants.RECEIVE_COUPON_ERROR_MSG[result - 1]);
         }
-
         //2.发送消息到mq 消息的内容 userId  couponId creater
         UserCouponDTO userCoupon = new UserCouponDTO();
         userCoupon.setCouponId(id);
@@ -215,24 +217,26 @@ public class UserCouponRedissonLuaMqAnnotationServiceImpl extends ServiceImpl<Us
 //            lockType = MyLockType.RE_ENTRANT_LOCK,
 //            lockStrategy = MyLockStrategy.FAIL_AFTER_RETRY_TIMEOUT)             //MyLock注解设置了执行顺序为0，所以会在事务开启之前加锁
     @Override
-//    @GlobalTransactional(rollbackFor = Exception.class)  //应该采用分布式事务的，但是由于sharding-Sphere和seata存在bug，暂时注释掉
+    @Transactional(rollbackFor = Exception.class)
     public void checkAndCreateUserCouponNew(UserCouponDTO msg) {
 
         //1.从db中查询优惠券基本信息
         Coupon coupon = couponMapper.selectByCreaterAndIdCoupon(msg.getCreater(), msg.getCouponId());
         if (coupon == null) {
             //优惠券不存在
-            throw new BizIllegalException("优惠券不存在！");
+//            throw new BizIllegalException("优惠券不存在！");
+            log.error("优惠券不存在！");
         }
 
-        //2.远程调用stock服务的rpc接口扣减优惠券的库存    这里采用乐观锁解决超卖问题
-        int result = couponStockClient.increaseInssueNum(msg.getCreater(), msg.getCouponId());
-        if (result == 0) {
-            //更新失败，说明库存不足（已经领取完）
-            throw new BizIllegalException("库存不足！");
-        }
+//        //2.远程调用stock服务的rpc接口扣减优惠券的库存    这里采用乐观锁解决超卖问题
+//        int result = couponStockClient.increaseInssueNum(msg.getCreater(), msg.getCouponId());
+//        if (result == 0) {
+//            //更新失败，说明库存不足（已经领取完）
+//            throw new BizIllegalException("库存不足！");
+//        }
 
         //3.生成用户券
+        //2.生成用户优惠券
         saveUserCoupon(msg.getUserId(), coupon);
 
         //4.更新兑换码的状态   db

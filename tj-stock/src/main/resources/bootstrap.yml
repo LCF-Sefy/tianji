@@ -83,7 +83,7 @@ dubbo:
   protocol:
     name: dubbo
     # 协议端口（ -1 表示自增端口，从 20880 开始）
-    port: 20884
+    port: -1
     id: dubbo
   cloud:
     subscribed-services:      # 订阅的服务（暂无）

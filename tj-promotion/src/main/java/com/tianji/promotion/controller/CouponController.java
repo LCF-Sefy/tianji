@@ -3,6 +3,7 @@ package com.tianji.promotion.controller;
 
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.domain.query.PageQuery;
+import com.tianji.common.ratelimiter.annotation.TjRateLimiter;
 import com.tianji.promotion.domain.dto.CouponFormDTO;
 import com.tianji.promotion.domain.dto.CouponIssueFormDTO;
 import com.tianji.promotion.domain.po.CouponScope;
@@ -73,6 +74,7 @@ public class CouponController {
 
     @ApiOperation("查询优惠券详情")
     @GetMapping("detail/{shopId}/{couponId}")
+    @TjRateLimiter(permitsPerSecond = 1, timeout = 0)
     public CouponVO detail(@PathVariable("shopId") Long shopId, @PathVariable("couponId") Long couponId){
         return couponService.detail(shopId, couponId);
     }

@@ -47,11 +47,11 @@ public interface ICouponService extends IService<Coupon> {
      */
     List<CouponVO> queryIssuingCoupons();
 
-    /**
-     * 查询当前商家正在发放中的优惠券
-     * @return
-     */
-    List<CouponVO> queryIssuingCouponsByshopId(Long shopId);
+//    /**
+//     * 查询当前商家正在发放中的优惠券
+//     * @return
+//     */
+//    List<CouponVO> queryIssuingCouponsByshopId(Long shopId);
 
     /**
      * 查询优惠券详情

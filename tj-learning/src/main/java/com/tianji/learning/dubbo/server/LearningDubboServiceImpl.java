@@ -15,18 +15,15 @@ public class LearningDubboServiceImpl implements LearningDubboService {
     private ILearningLessonService learningLessonService;
 
     @Override
-    @SentinelResource(value = "QUEUE-DATA-DEGRADE", fallback = "degradeMethod")
-    public void sayHello(String name) {
-//        int i = 1 / 0;
-        System.out.println("Hello!" + name);
+    public String sayHello(String name) {
+        int i = 1 / 0;
+        return "Hello  + name + ";
     }
 
-    public void degradeMethod(String name, Throwable t) {
-        System.out.println("Degrade method called with name: " + name + ", exception: " + t.getMessage());
-    }
+
 
     @Override
-    public void testSeate() {
+    public void testSeata() {
         learningLessonService.addUserLesson(129L, Arrays.asList(1549025085494521857L));
     }
 }

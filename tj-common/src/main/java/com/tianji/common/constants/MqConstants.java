@@ -122,5 +122,17 @@ public interface MqConstants {
         /*用户课程有关消费组*/
         String USER_COURSE_DELETE = "consumer_group_delete_course";
         String USER_COURSE_SAVE = "consumer_group_save_course";
+
+        /**
+         * 用户优惠券相关消费组
+         */
+        String USER_COUPON_SAVE = "consumer_group_save_user_coupon";
+        String USER_COUPON_DELETE = "consumer_group_delete_user_coupon";
+
+        /**
+         * 库存有关消费组
+         */
+        String COUPON_STOCK_REDUCE = "consumer_group_reduce_coupon_stock";
+        String COUPON_STOCK_ADD = "consumer_group_add_coupon_stock";
     }
 }

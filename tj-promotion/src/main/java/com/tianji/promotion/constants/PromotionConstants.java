@@ -6,13 +6,16 @@ public interface PromotionConstants {
     String COUPON_CACHE_KEY_PREFIX = "prs:coupon:";
     String COUPON_RANGE_KEY = "coupon:code:range";
 
-    String SHOP_COUPON_CACHE_KEY_PREFIX = "prs:shop:coupon:";
 
-    String SHOP_COUPON_CHECK_KEY_FORMAT = "prs:check:coupon:%s:%s";
-    String SHOP_COUPON_DETAIL_KEY_FORMAT = "prs:detail:coupon:%s:%s";
-    String SHOP_COUPON_ISSUED_KEY_FORMAT = "prs:issued:coupon:%s:%s";
+    //配置库存和扣减库存会用          {%s}保证在集群计算key时都根据优惠券id计算，能路由到同一个分片
+    String SHOP_COUPON_CHECK_KEY_FORMAT = "prs:check:coupon:%s:{%s}";
+    String SHOP_COUPON_DETAIL_KEY_FORMAT = "prs:detail:coupon:%s:{%s}";
 
-    String SHOP_COUPON_LIST_KEY_FORMAT = "prs:list:coupon:%s:%s"; //商家id:优惠券状态
+    //prs:issued:coupon:商家id:优惠券id      如果要对大key拆分在后面加上:hash(field)%大key的拆分数量          这里的field为用户id
+    String SHOP_COUPON_ISSUED_KEY_FORMAT = "prs:issued:coupon:%s:{%s}";
+
+    //根据商家id计算key
+    String SHOP_COUPON_LIST_KEY_FORMAT = "prs:list:coupon:{%s}:%s"; //商家id:优惠券状态
 
 
     String COUPON_LOCAL_CACHE_KEY_FORMAT = "%s:%s";  //商家id：优惠券id

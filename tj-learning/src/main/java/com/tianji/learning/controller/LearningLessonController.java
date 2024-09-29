@@ -1,6 +1,7 @@
 package com.tianji.learning.controller;
 
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.domain.query.PageQuery;
 import com.tianji.learning.domain.dto.LearningPlanDTO;
