@@ -18,6 +18,23 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
+        <!--jd hotkey相关依赖-->
+        <dependency>
+            <groupId>com.jd.platform.hotkey</groupId>
+            <artifactId>hk-common</artifactId>
+            <version>0.0.4-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hutool-all</artifactId>
+                    <groupId>cn.hutool</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.jd.platform.hotkey</groupId>
+            <artifactId>hk-client</artifactId>
+            <version>0.0.4-SNAPSHOT</version>
+        </dependency>
         <!--auth-sdk-->
         <dependency>
             <groupId>com.tianji</groupId>

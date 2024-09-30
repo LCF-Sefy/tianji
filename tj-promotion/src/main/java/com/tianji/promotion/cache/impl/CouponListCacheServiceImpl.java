@@ -40,7 +40,7 @@ public class CouponListCacheServiceImpl implements CouponListCacheService {
     //本地锁
     private final Lock localCacheUpdatelock = new ReentrantLock();
 
-    private final static Logger logger = LoggerFactory.getLogger(CouponCacheServiceImpl.class);
+    private final static Logger logger = LoggerFactory.getLogger(CouponCacheHotKeyServiceImpl.class);
 
     /**
      * 获取缓存中店铺发放中的优惠券列表

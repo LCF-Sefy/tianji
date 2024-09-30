@@ -40,6 +40,8 @@ spring:
         - data-id: shared-sentinel.yaml # 共享sentinel配置
           refresh: false
 #          - data-id: shared-datasource.yaml # 数据源配置
+        - data-id: shared-etcd.yaml          # etcd配置
+          refresh: false
 
 # dubbo相关配置
 dubbo:
@@ -81,3 +83,4 @@ tj:
 rocketmq:
   producer:
     retry
+

@@ -3,6 +3,7 @@ package com.tianji.stock.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
+import com.tianji.common.utils.DateUtils;
 import com.tianji.stock.domain.dto.CouponStockDTO;
 import com.tianji.stock.domain.po.CouponStock;
 import com.tianji.stock.mapper.StockMapper;
@@ -12,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @Slf4j

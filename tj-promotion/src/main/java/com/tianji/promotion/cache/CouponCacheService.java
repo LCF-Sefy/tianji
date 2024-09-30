@@ -17,6 +17,15 @@ public interface CouponCacheService {
     CouponBusinessCache<CouponVO> getCachedCouponDetail(Long shopId, Long couponId);
 
     /**
+     * 引入hotkey：从分布式缓存中获取店铺某个优惠券详情缓存
+     * @param shopId
+     * @param couponId
+     * @param isUpdate 是否更新hotkey本地缓存
+     * @return
+     */
+    CouponBusinessCache<CouponVO> getgetDistributedCache(Long shopId, Long couponId, boolean isUpdate);
+
+    /**
      * 更新店铺某个优惠券详情缓存
      *
      * @param shopId
@@ -31,4 +40,6 @@ public interface CouponCacheService {
      * @return
      */
     CouponBusinessCache<CouponVO> getDistributedCache(Long shopId, Long couponId);
+
+
 }

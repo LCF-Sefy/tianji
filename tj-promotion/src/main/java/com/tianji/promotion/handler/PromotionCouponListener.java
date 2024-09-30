@@ -3,6 +3,7 @@ package com.tianji.promotion.handler;
 import com.tianji.common.constants.MqConstants;
 import com.tianji.common.domain.mq.CouponMessage;
 import com.tianji.common.utils.BeanUtils;
+import com.tianji.common.utils.DateUtils;
 import com.tianji.promotion.domain.dto.UserCouponDTO;
 import com.tianji.promotion.service.IUserCouponService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,8 @@ import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 @Slf4j

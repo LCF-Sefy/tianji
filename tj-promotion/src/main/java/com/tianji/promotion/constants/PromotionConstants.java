@@ -19,6 +19,10 @@ public interface PromotionConstants {
 
 
     String COUPON_LOCAL_CACHE_KEY_FORMAT = "%s:%s";  //商家id：优惠券id
+
+    //hotkey的本地缓存中的key格式     单个优惠券详情
+    String COUPON_HK_LOCAL_CACHE_KEY_FORMAT = "prs:one:%s:%s";  //商家id：优惠券id
+
     String SHOP_COUPON_LIST_LOCAL_CACHE_KEY_FORMAT = "%s:%s";     //商家id:优惠券状态
 
     /**

@@ -1,6 +1,7 @@
 package com.tianji.promotion.controller;
 
 
+import com.jd.platform.hotkey.client.callback.JdHotKeyStore;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.domain.query.PageQuery;
 import com.tianji.common.ratelimiter.annotation.TjRateLimiter;
@@ -74,8 +75,32 @@ public class CouponController {
 
     @ApiOperation("查询优惠券详情")
     @GetMapping("detail/{shopId}/{couponId}")
-    @TjRateLimiter(permitsPerSecond = 1, timeout = 0)
+    @TjRateLimiter(permitsPerSecond = 1000, timeout = 0)
     public CouponVO detail(@PathVariable("shopId") Long shopId, @PathVariable("couponId") Long couponId){
         return couponService.detail(shopId, couponId);
+    }
+
+
+    //测试hotkey的接入
+    @PostMapping("hotkey")
+    public Object hotkey(@RequestParam("key") String key) {
+        //是hotkey则从本地缓存中取
+        if (JdHotKeyStore.isHotKey(key)){
+            Object value = JdHotKeyStore.get(key);
+            //如果value为null，则需要从缓存中拿数据然后设置到本地缓存，应当使用分布式所。
+            if (value == null) {
+                //获取分布式锁
+
+                //获取失败，则稍后再试
+
+                //获取成功，则从缓存中拿数据，然后设置到本地缓存
+                value = "从缓存中取出更新到本地缓存";
+                JdHotKeyStore.smartSet(key, value);
+                return value;
+            }
+            return "从本地缓存中取到：" + value;
+        }
+        //不是hotkey则从缓存中取
+        return "不是hotkey，从缓存中取";
     }
 }

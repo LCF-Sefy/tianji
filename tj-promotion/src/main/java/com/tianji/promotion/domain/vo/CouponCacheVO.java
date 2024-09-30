@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.tianji.common.utils.DateUtils;
+
 /**
  * 保存在缓存中的优惠券实体
  */
@@ -81,7 +83,8 @@ public class CouponCacheVO {
                 if (value != null) {
                     if (value instanceof LocalDateTime) {
                         // LocalDateTime类型转换为时间戳（毫秒）
-                        map.put(field.getName(), String.valueOf(DateUtils.toEpochMilli(((LocalDateTime) value))));
+
+                        String put = map.put(field.getName(), String.valueOf(DateUtils.toEpochMilli((LocalDateTime) value)));
                     } else {
                         // 其他类型直接转换为字符串
                         map.put(field.getName(), value.toString());
