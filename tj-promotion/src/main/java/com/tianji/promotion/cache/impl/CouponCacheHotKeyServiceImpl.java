@@ -1,6 +1,6 @@
 package com.tianji.promotion.cache.impl;
 
-import com.hotkey.client.callback.JdHotKeyStore;
+import com.jd.platform.hotkey.client.callback.JdHotKeyStore;
 import com.tianji.common.cache.distribute.DistributedCacheService;
 import com.tianji.common.cache.local.LocalCacheService;
 import com.tianji.common.domain.cache.CouponBusinessCache;
