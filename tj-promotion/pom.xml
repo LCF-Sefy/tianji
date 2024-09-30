@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.jd.platform.hotkey</groupId>
             <artifactId>hk-common</artifactId>
-            <version>0.0.4-SNAPSHOT</version>
+            <version>1.0.0</version>
             <exclusions>
                 <exclusion>
                     <artifactId>hutool-all</artifactId>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.jd.platform.hotkey</groupId>
             <artifactId>hk-client</artifactId>
-            <version>0.0.4-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <!--auth-sdk-->
         <dependency>
