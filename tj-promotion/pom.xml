@@ -17,11 +17,20 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>chaofan</id>
+            <url>http://192.168.150.101:8081/repository/chaofan/</url>
+        </repository>
+    </repositories>
+
+
     <dependencies>
         <!--jd hotkey相关依赖-->
         <dependency>
             <groupId>com.jd.platform.hotkey</groupId>
-            <artifactId>hk-common</artifactId>
+            <artifactId>common</artifactId>
             <version>1.0.0</version>
             <exclusions>
                 <exclusion>
@@ -32,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>com.jd.platform.hotkey</groupId>
-            <artifactId>hk-client</artifactId>
+            <artifactId>client</artifactId>
             <version>1.0.0</version>
         </dependency>
         <!--auth-sdk-->
