@@ -9,7 +9,6 @@
         <version>1.0.0</version>
     </parent>
 
-    <groupId>com.sefu</groupId>
     <artifactId>tj-promotion</artifactId>
 
     <properties>
@@ -27,7 +26,7 @@
 
 
     <dependencies>
-        <!--jd hotkey相关依赖-->
+        <!--jd hotkey的相关依赖-->
         <dependency>
             <groupId>com.jd.platform.hotkey</groupId>
             <artifactId>common</artifactId>
@@ -44,6 +43,7 @@
             <artifactId>client</artifactId>
             <version>1.0.0</version>
         </dependency>
+
         <!--auth-sdk-->
         <dependency>
             <groupId>com.tianji</groupId>
