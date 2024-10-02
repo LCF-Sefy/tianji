@@ -62,13 +62,13 @@ public class CouponCacheHotKeyServiceImpl implements CouponCacheService {
             //是hotkey但value为null，则需要从redis中取出然后更新本地缓存的value
             if (couponCache == null) {
                 logger.info("{}：是hotkey，但本地缓存为空，需要从redis中获取并更新本地缓存",localKey);
-                return getgetDistributedCache(shopId, couponId,true);
+                return getDistributedCache(shopId, couponId,true);
             }
             return couponCache;
         }
         //如果不是hotkey则需要从redis缓存取
         logger.info("{}：不是hotkey，需要从redis中获取",localKey);
-        return getgetDistributedCache(shopId, couponId,false);
+        return getDistributedCache(shopId, couponId,false);
     }
 
     /**
@@ -80,7 +80,7 @@ public class CouponCacheHotKeyServiceImpl implements CouponCacheService {
      * @return
      */
     @Override
-    public CouponBusinessCache<CouponVO> getgetDistributedCache(Long shopId, Long couponId, boolean isUpdate) {
+    public CouponBusinessCache<CouponVO> getDistributedCache(Long shopId, Long couponId, boolean isUpdate) {
         logger.info("从分布式缓存中获取数据");
         String key = String.format(PromotionConstants.SHOP_COUPON_DETAIL_KEY_FORMAT, shopId, couponId);
 

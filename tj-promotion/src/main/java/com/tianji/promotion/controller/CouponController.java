@@ -75,11 +75,13 @@ public class CouponController {
 
     @ApiOperation("查询优惠券详情")
     @GetMapping("detail/{shopId}/{couponId}")
-    @TjRateLimiter(permitsPerSecond = 1000, timeout = 0)
+    @TjRateLimiter(permitsPerSecond = 3000, timeout = 0)
     public CouponVO detail(@PathVariable("shopId") Long shopId, @PathVariable("couponId") Long couponId){
         return couponService.detail(shopId, couponId);
     }
 
+
+    //以下均为测试
 
     //测试hotkey的接入
     @PostMapping("hotkey")

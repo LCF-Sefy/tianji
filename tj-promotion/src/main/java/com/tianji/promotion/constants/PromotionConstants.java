@@ -17,13 +17,16 @@ public interface PromotionConstants {
     //根据商家id计算key
     String SHOP_COUPON_LIST_KEY_FORMAT = "prs:list:coupon:{%s}:%s"; //商家id:优惠券状态
 
-
+    //本地缓存中的key格式     单个优惠券详情
     String COUPON_LOCAL_CACHE_KEY_FORMAT = "%s:%s";  //商家id：优惠券id
+    //本地缓存中的key格式     商家优惠券列表
+    String SHOP_COUPON_LIST_LOCAL_CACHE_KEY_FORMAT = "%s:%s";     //商家id:优惠券状态
 
     //hotkey的本地缓存中的key格式     单个优惠券详情
     String COUPON_HK_LOCAL_CACHE_KEY_FORMAT = "prs:one:%s:%s";  //商家id：优惠券id
+    //hotkey的本地缓存中的key格式     商家优惠券列表
+    String SHOP_COUPON_HK_LIST_LOCAL_CACHE_KEY_FORMAT = "prs:list:%s:%s";     //商家id:优惠券状态
 
-    String SHOP_COUPON_LIST_LOCAL_CACHE_KEY_FORMAT = "%s:%s";     //商家id:优惠券状态
 
     /**
      * 优惠券详情分布式缓存更新时的分布式锁key模板
